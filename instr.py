@@ -96,7 +96,7 @@ class Fill_In_Inst(Instruction):
     def _simple_exec_handler(self, state, inputs):
         raise RuntimeError("Tried to run fill-in instruction for opcode {}"
                 "".format(self.pcode.opcode))
-            
+
 class Copy(Instruction):
     opcode = 1
     def _simple_exec_handler(self, state, inputs):
@@ -159,7 +159,7 @@ class CallOther(Instruction):
     """CallOther instructions are described in a couple places, and implement a number of operations like software interrupts...  "userop.hh" describes them as below:
         "Within the raw p-code framework, the CALLOTHER opcode represents a user defined operation. At this level, the operation is just a placeholder for inputs and outputs to same black-box procedure. The first input parameter (index 0) must be a constant id associated with the particular procedure. Classes derived off of this base class provide a more specialized definition of an operation/procedure. The specialized classes are managed via UserOpManage and are associated with CALLOTHER ops via the constant id.
         "The derived classes can in principle implement any functionality, tailored to the architecture or program. At this base level, the only commonality is a formal \b name of the operator and its CALLOTHER index.  A facility for reading in implementation details is provided via restoreXml()."
-    
+
     "improvingDisassemblyAndDecompilation.tex" has this to say about them: "These operations show up as CALLOTHER Pcode ops in the Pcode field in the Listing.  They can have inputs and outputs, but otherwise are treated as black boxes by the decompiler."
 
     In this code, we have to look up the operation in an architecture
@@ -174,7 +174,7 @@ class CallOther(Instruction):
         other_op = state.arch.resolve_callother(inputs[0], inputs[1])
         retval = other_op(state, inputs[0], inputs[1])
         return CallOtherMarker() if retval is None else retval
-        
+
 
 class Return(Instruction):
     opcode = 10
@@ -252,8 +252,8 @@ class Int_Sub(Instruction):
 
 class Int_Carry(Instruction):
     # This becomes the carry flag in add (matters with unsigned ints)
-    opcode = 21 
-    
+    opcode = 21
+
     def _simple_exec_handler(self, state, inputs):
         input_size = self.pcode.inputs[0].size
         add_result = inputs[0] + inputs[1]
@@ -437,6 +437,11 @@ class Subpiece(Instruction):
     def _simple_exec_handler(self, state, inputs):
         return inputs[0] >> (inputs[1] * self.arch.bits_per_byte)
 
+class Popcount(Instruction):
+    opcode = 72
+    def _simple_exec_handler(self, state, inputs):
+        return bin(inputs[0]).count('1')
+
 """
 Opcode map
 (1, u'COPY')
@@ -508,6 +513,7 @@ Opcode map
 (67, u'INVALID_OP')
 (68, u'CPOOLREF')
 (69, u'NEW')
+(72, u'POPCOUNT)
 """
 
 def instruction_finder(pcode, arch):
